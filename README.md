@@ -3,7 +3,7 @@
 ## 🏆 Result
 Ranked **#1 on the final (private) leaderboard** in a regression-focused machine learning competition.
 
-![Leaderboard](images/kaggle-rank.png)
+![Leaderboard](kaggle-rank.png)
 *Final private leaderboard showing 1st place ranking*
 
 Competition:
