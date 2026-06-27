@@ -2,6 +2,9 @@
 
 [![CI](https://github.com/phoenix1revv-risefromashes/ML-Kaggle-Competition-Winning/actions/workflows/ci.yml/badge.svg)](https://github.com/phoenix1revv-risefromashes/ML-Kaggle-Competition-Winning/actions/workflows/ci.yml)
 
+##Overview
+A university-wide ML competition at Sofia University open to all departments. One winner. This was it.
+
 **Competition:** [Sofia ML Regression 2026 Winter](https://www.kaggle.com/competitions/sofia-ml-regression-2026-winter)  
 **Kaggle profile:** [phoenix01revv](https://www.kaggle.com/phoenix01revv)
 
