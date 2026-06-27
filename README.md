@@ -1,104 +1,60 @@
-# Kaggle Competition – Sofia ML Regression 2026 Winter
+# Sofia ML Regression 2026 — #1 Private Leaderboard
 
-## 🏆 Result
-Ranked **#1 on the final (private) leaderboard** in a regression-focused machine learning competition.
+[![CI](https://github.com/phoenix1revv-risefromashes/ML-Kaggle-Competition-Winning/actions/workflows/ci.yml/badge.svg)](https://github.com/phoenix1revv-risefromashes/ML-Kaggle-Competition-Winning/actions/workflows/ci.yml)
 
-![Leaderboard](kaggle-rank.png)
-*Final private leaderboard showing 1st place ranking*
+**Competition:** [Sofia ML Regression 2026 Winter](https://www.kaggle.com/competitions/sofia-ml-regression-2026-winter)  
+**Kaggle profile:** [phoenix01revv](https://www.kaggle.com/phoenix01revv)
 
-Competition:
-https://www.kaggle.com/competitions/sofia-ml-regression-2026-winter
+[![Leaderboard — #1 private](assets/kaggle-rank.png)](assets/kaggle-rank.png)
 
 ---
 
-## 📊 Overview
+## The key insight
 
-The key insight behind this solution was identifying that the dataset exhibited **two distinct regimes**:
+EDA revealed the dataset had two structurally different regimes:
 
-- ~93% of the data followed a **linear relationship**
-- ~7% of the data followed a **quadratic relationship**
+- **~93% of rows** followed a linear relationship
+- **~7% of rows** (outliers by IQR) followed a parabolic pattern: `target ≈ 5 × x1²`
 
-Instead of applying a single model, I designed a hybrid approach to handle both patterns effectively.
+A single model handles neither regime well. The solution treats them separately.
 
----
+## Approach
 
-## ⚙️ Approach
+**1. Preprocessing** — median imputation for missing values, IQR-based segmentation to split normal vs. extreme rows.
 
-### 1. Data Preprocessing
-- Filled missing values using **median imputation**
-- Identified outliers using **IQR (Interquartile Range)**
+**2. Feature engineering** — squared all 15 features (x0²…x14²), bringing the total to 30. This lets a linear model fit the curved pattern in extreme rows without switching model families.
 
----
+**3. Model** — Linear Regression trained on normal rows only, with StandardScaler for stability.
 
-### 2. Data Segmentation
-- Split dataset into:
-  - **Normal rows (~93%)**
-  - **Extreme rows (~7%)**
+**4. Blending** — final prediction blends the learned model with the hand-derived formula:
 
----
-
-### 3. Model for Normal Data
-- Trained **Linear Regression** on normal rows only  
-- Added squared features  
-- Applied scaling for stability  
-
----
-
-### 4. Extreme Data Insight
-Through analysis, discovered:
-
-target ≈ 5 × x1²  
-
-This relationship was derived from data inspection, not learned by the model.
-
----
-
-### 5. Final Model (Blending)
-
+```
 ŷ = 0.9 × Linear Model + 0.1 × (5 × x1²)
+```
 
-- Linear model captures general trends  
-- Formula handles extreme cases  
-- Blending improves overall performance  
+The formula wasn't learned — it was derived from data inspection. That's what won it.
 
----
+## Results
 
-## 📈 Results
+| Split | Score |
+|---|---|
+| Private leaderboard | **#1** |
+| Cross-validation (RMSE) | ~0.0819 |
+| Public leaderboard | Low — extreme rows absent from public test set |
 
-- **Private Leaderboard:** #1  
-- **Public Leaderboard:** Low (no extreme rows present)  
-- **Cross-Validation:** ~0.0819 (consistent with private score)  
+The public/private gap was expected: the public leaderboard didn't include extreme rows, so the formula term had no impact there. The private set did — and that's where it mattered.
 
----
+## Repository structure
 
-## 🧠 Key Learnings
+```
+├── Competition Submitted Notebook.ipynb   # full solution — EDA, feature engineering, training, submission
+├── assets/
+│   ├── kaggle-rank.png                    # leaderboard proof
+│   └── Presentation of the ML Pipeline.pptx
+├── .github/
+│   └── workflows/
+│       └── ci.yml                         # notebook validation CI
+└── .gitignore
+```
 
-- EDA is critical for uncovering hidden patterns  
-- Outliers can represent meaningful structure  
-- Simple models + insight outperform complex models  
-- Cross-validation prevents overfitting  
-- Hybrid approaches improve robustness  
-
----
-
-## 📁 Repository Contents
-
-- `Competition Submitted Notebook.ipynb` → full solution notebook  
-- `images/kaggle-rank.png` → leaderboard proof  
-
----
-
-## ⚠️ Notes
-
-- Dataset not included due to competition rules  
-- Code is structured for reproducibility  
-
----
-
-## 🔗 Links
-
-- Competition:  
-  https://www.kaggle.com/competitions/sofia-ml-regression-2026-winter  
-
-- Kaggle Profile:  
-  https://www.kaggle.com/phoenix01revv  
+> Dataset not included per competition rules. Update the file paths in Section 2 of the notebook before running locally.

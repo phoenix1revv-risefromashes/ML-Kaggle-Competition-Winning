@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate Notebook & Structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install nbformat
+
+      - name: Validate notebook structure
+        run: |
+          python - <<'EOF'
+          import json, sys
+
+          with open("Competition Submitted Notebook.ipynb") as f:
+              nb = json.load(f)
+
+          cells = nb['cells']
+          assert len(cells) > 0, "Notebook has no cells"
+
+          code_cells = [c for c in cells if c['cell_type'] == 'code']
+          assert len(code_cells) >= 5, f"Expected at least 5 code cells, found {len(code_cells)}"
+
+          # No Colab-specific code
+          for i, cell in enumerate(code_cells):
+              src = ''.join(cell['source'])
+              assert 'google.colab' not in src, f"Cell {i} contains Colab-specific code"
+              assert 'drive.mount' not in src, f"Cell {i} contains drive.mount"
+
+          # Key imports present
+          all_code = '\n'.join(''.join(c['source']) for c in code_cells)
+          required = ['pandas', 'numpy', 'LinearRegression', 'StandardScaler', 'SimpleImputer']
+          for pkg in required:
+              assert pkg in all_code, f"Missing expected import/usage: {pkg}"
+
+          assert 'kernelspec' in nb.get('metadata', {}), "Missing kernelspec metadata"
+
+          print(f"Notebook valid — {len(cells)} cells ({len(code_cells)} code)")
+          print("No Colab-specific code found")
+          print("All required imports present")
+          EOF
+
+      - name: Validate notebook format
+        run: |
+          python - <<'EOF'
+          import nbformat
+
+          with open("Competition Submitted Notebook.ipynb") as f:
+              nb = nbformat.read(f, as_version=4)
+
+          nbformat.validate(nb)
+          print("Notebook passes nbformat validation")
+          EOF
+
+      - name: Verify project structure
+        run: |
+          python - <<'EOF'
+          import os, sys
+
+          required = [
+              "Competition Submitted Notebook.ipynb",
+              "README.md",
+              ".gitignore",
+              "assets/kaggle-rank.png",
+              "assets/Presentation of the ML Pipeline.pptx",
+          ]
+
+          missing = [p for p in required if not os.path.exists(p)]
+          if missing:
+              print("Missing files:")
+              for p in missing:
+                  print(f"  {p}")
+              sys.exit(1)
+
+          print(f"Project structure OK — {len(required)} files verified")
+          EOF
+
+      - name: Check README content
+        run: |
+          python - <<'EOF'
+          import sys
+
+          with open("README.md") as f:
+              content = f.read()
+
+          required = ["#1", "leaderboard", "Approach", "Results", "insight", "assets/kaggle-rank.png"]
+          missing = [s for s in required if s.lower() not in content.lower()]
+          if missing:
+              print(f"README missing expected content: {missing}")
+              sys.exit(1)
+
+          print("README content check passed")
+          EOF
